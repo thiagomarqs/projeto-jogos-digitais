@@ -205,6 +205,7 @@ class World(pygame.sprite.Sprite):
             self.image.blit(self.background[3][0], (0,0), self.background[3][1])
 
 '''
+
 def game_menu(onClick=False):
 
 
@@ -295,6 +296,7 @@ def main_game(gameMode):
     screen = pygame.display.set_mode(screen_size)
         
     world = get_world(gameMode)
+    world_x = 0
 
     P1 = Player(100,380,0.5)
 
@@ -327,9 +329,15 @@ def main_game(gameMode):
                 if event.key == pygame.K_SPACE:
                     P1.isJump = True
  
-        #world.update((5,0))
-        screen.blit(world, dest=(0,0))
+        # Animação do background
+        screen.blit(world, (world_x,0))
+        screen.blit(world, (world.get_width() + world_x,0))
+        if world_x == -world.get_width():
+            screen.blit(world, (world.get_width() + world_x, 0))
+            world_x = 0
+        world_x-=10
         
+
         #Moves and Re-draws all Sprites
         for entity in all_sprites:
             window.blit(entity.image, entity.rect)
