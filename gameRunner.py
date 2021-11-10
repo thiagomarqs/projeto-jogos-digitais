@@ -40,18 +40,30 @@ class GAMEMODE(enumerate):
     CLASSICO = 1
     RUA = 2
     SOFT = 3
+
+class CHARACTER(enumerate):
+    AMADOR = 1
+    PROFISSIONAL = 2
  
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, gameMode):
         super().__init__() 
-        self.sprites = [
-            pygame.image.load("resources/enemy/trash.png").convert_alpha(),
-            pygame.image.load("resources/enemy/cone.png").convert_alpha(),
-            pygame.image.load("resources/enemy/dog.png").convert_alpha(),
-            pygame.image.load("resources/enemy/litter.png").convert_alpha(),
-            pygame.image.load("resources/enemy/cat.png").convert_alpha(),
-            pygame.image.load("resources/enemy/rock.png").convert_alpha(),
-        ]
+
+        self.sprites = []
+        
+        if gameMode == GAMEMODE.CLASSICO:
+            self.sprites = [
+                pygame.image.load("resources/enemy/obstacle.png").convert_alpha()
+            ]
+        else:
+            self.sprites = [
+                pygame.image.load("resources/enemy/trash.png").convert_alpha(),
+                pygame.image.load("resources/enemy/cone.png").convert_alpha(),
+                pygame.image.load("resources/enemy/dog.png").convert_alpha(),
+                pygame.image.load("resources/enemy/litter.png").convert_alpha(),
+                pygame.image.load("resources/enemy/cat.png").convert_alpha(),
+                pygame.image.load("resources/enemy/rock.png").convert_alpha(),
+            ]
         self.indexSprite = 0
         self.image = self.sprites[self.indexSprite]
         self.rect = self.image.get_rect()
@@ -103,18 +115,32 @@ class Enemy(pygame.sprite.Sprite):
         return self.score
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y, speed):
+    def __init__(self, character, pos_x, pos_y, speed):
         super().__init__()
-        self.sprites = [
-            pygame.image.load("resources/player\R1.png").convert_alpha(),
-            pygame.image.load("resources/player\R2.png").convert_alpha(),
-            pygame.image.load("resources/player\R3.png").convert_alpha(),
-            pygame.image.load("resources/player\R4.png").convert_alpha(),
-            pygame.image.load("resources/player\R5.png").convert_alpha(),
-            pygame.image.load("resources/player\R6.png").convert_alpha(),
-            pygame.image.load("resources/player\R7.png").convert_alpha(),
-            pygame.image.load("resources/player\R8.png").convert_alpha(),
-            ]
+        self.sprites = []
+
+        if character == CHARACTER.AMADOR:
+            self.sprites = [
+                pygame.image.load("resources/player\R1.png").convert_alpha(),
+                pygame.image.load("resources/player\R2.png").convert_alpha(),
+                pygame.image.load("resources/player\R3.png").convert_alpha(),
+                pygame.image.load("resources/player\R4.png").convert_alpha(),
+                pygame.image.load("resources/player\R5.png").convert_alpha(),
+                pygame.image.load("resources/player\R6.png").convert_alpha(),
+                pygame.image.load("resources/player\R7.png").convert_alpha(),
+                pygame.image.load("resources/player\R8.png").convert_alpha(),
+                ]
+        else:
+            self.sprites = [
+                pygame.image.load("resources/player/second_character/R1.png").convert_alpha(),
+                pygame.image.load("resources/player/second_character/R2.png").convert_alpha(),
+                pygame.image.load("resources/player/second_character/R3.png").convert_alpha(),
+                pygame.image.load("resources/player/second_character/R4.png").convert_alpha(),
+                pygame.image.load("resources/player/second_character/R5.png").convert_alpha(),
+                pygame.image.load("resources/player/second_character/R6.png").convert_alpha(),
+                pygame.image.load("resources/player/second_character/R7.png").convert_alpha(),
+                pygame.image.load("resources/player/second_character/R8.png").convert_alpha(),
+                ]
         self.current_sprite = 0
         self.jumping = False
         self.jumpheight = 250
@@ -237,12 +263,48 @@ def game_menu(onClick=False):
             start_button.draw(mouse_pos, window)
 
             if not onClick and start_button.is_clicked(mouse_pos, mouse_clicks):
-                choose_scenary()
+                choose_character()
 
             pygame.display.update()
             clock.tick(FPS)
 
-def choose_scenary():
+def choose_character():
+    menuScenery = True
+    window.fill(BLACK)
+    large_text = MEDIUM_FONT.render("Escolha o personagem", True, YELLOW)
+    text_rect = large_text.get_rect()
+    text_rect.center = (screen_width // 2, (screen_height // 2) - 50)
+    window.blit(large_text, text_rect)
+    window.blit(large_text, text_rect)
+
+    
+    amador_button = Button("Corredor amador", screen_width // 8.1,
+                           screen_height // 2 + 100, 100, 300, YELLOW, BLUE, BLACK, 40)
+    profissional_button = Button("Corredor profissional", screen_width // 1.9,
+                           screen_height // 2 + 100, 100, 300, YELLOW, BLUE, BLACK, 40)
+
+    while menuScenery:
+        mouse_clicks = pygame.mouse.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            mouse_pos = pygame.mouse.get_pos()
+
+            amador_button.draw(mouse_pos, window)
+            profissional_button.draw(mouse_pos, window)
+
+            if amador_button.is_clicked(mouse_pos, mouse_clicks):
+                choose_scenary(CHARACTER.AMADOR)
+            elif profissional_button.is_clicked(mouse_pos, mouse_clicks):
+                choose_scenary(CHARACTER.PROFISSIONAL)
+
+            pygame.display.update()
+            clock.tick(FPS)
+
+
+def choose_scenary(character):
     menuScenery = True
     window.fill(BLACK)
     large_text = MEDIUM_FONT.render("Escolha o cenário", True, YELLOW)
@@ -273,11 +335,11 @@ def choose_scenary():
             soft_button.draw(mouse_pos, window)
 
             if classico_button.is_clicked(mouse_pos, mouse_clicks):
-                main_game(GAMEMODE.CLASSICO)
+                main_game(GAMEMODE.CLASSICO, character)
             elif rua_button.is_clicked(mouse_pos, mouse_clicks):
-                main_game(GAMEMODE.RUA)
+                main_game(GAMEMODE.RUA, character)
             elif soft_button.is_clicked(mouse_pos, mouse_clicks):
-                main_game(GAMEMODE.SOFT)
+                main_game(GAMEMODE.SOFT, character)
 
             pygame.display.update()
             clock.tick(FPS)
@@ -290,7 +352,7 @@ def get_world(gameMode):
     else:
         return pygame.image.load("resources/background/soft.jpg").convert()
 
-def main_game(gameMode):
+def main_game(gameMode, character):
     ENEMY_SPEED = 5
     SCORE = 0
     screen = pygame.display.set_mode(screen_size)
@@ -298,10 +360,10 @@ def main_game(gameMode):
     world = get_world(gameMode)
     world_x = 0
 
-    P1 = Player(100,380,0.5)
+    P1 = Player(character, 100,380,0.5)
 
     #Creating Sprites Groups
-    E1 = Enemy()
+    E1 = Enemy(gameMode)
     enemies = pygame.sprite.Group()
     enemies.add(E1)
     all_sprites = pygame.sprite.Group()
