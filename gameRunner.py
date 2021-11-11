@@ -32,9 +32,16 @@ clock = pygame.time.Clock()
 
 LARGE_FONT = pygame.font.SysFont(None, 115)
 MEDIUM_FONT = pygame.font.SysFont(None, 65)
+SMALL_FONT = pygame.font.SysFont(None, 35)
 
 SCORE = 0
 ENEMY_SPEED = 5
+
+
+# Tive que passar essa variável como argumento de várias
+# funções porque o main_game() não reconheceu essa variável
+# como global e não descobri porquê.
+is_profissional_unlocked = False
 
 class GAMEMODE(enumerate):
     CLASSICO = 1
@@ -172,7 +179,7 @@ class Player(pygame.sprite.Sprite):
                 self.jumpCount = 10
                 self.isJump = False
 
-def game_menu(onClick=False):
+def game_menu(is_profissional_unlocked, onClick=False):
 
 
     menu = True
@@ -197,18 +204,18 @@ def game_menu(onClick=False):
                 quit()
             if event.type == pygame.KEYDOWN:
                  if event.key == pygame.K_SPACE:
-                     choose_character()
+                     choose_character(is_profissional_unlocked)
 
             mouse_pos = pygame.mouse.get_pos()
             start_button.draw(mouse_pos, window)
 
             if not onClick and start_button.is_clicked(mouse_pos, mouse_clicks):
-                choose_character()
+                choose_character(is_profissional_unlocked)
 
             pygame.display.update()
             clock.tick(FPS)
 
-def choose_character():
+def choose_character(is_profissional_unlocked):
     menuScenery = True
     window.fill(BLACK)
     large_text = MEDIUM_FONT.render("Escolha o personagem", True, YELLOW)
@@ -217,7 +224,10 @@ def choose_character():
     window.blit(large_text, text_rect)
     window.blit(large_text, text_rect)
 
-    
+    character_locked_text = SMALL_FONT.render("'Profissional' bloqueado! Complete 50m!", True, YELLOW)
+    character_locked_text_rect = character_locked_text.get_rect()
+    character_locked_text_rect.center = (screen_width // 2, (screen_height) - 50)
+
     amador_button = Button("Corredor amador", screen_width // 8.1,
                            screen_height // 2 + 100, 100, 300, YELLOW, BLUE, BLACK, 40)
     profissional_button = Button("Corredor profissional", screen_width // 1.9,
@@ -236,14 +246,16 @@ def choose_character():
             profissional_button.draw(mouse_pos, window)
 
             if amador_button.is_clicked(mouse_pos, mouse_clicks):
-                choose_scenary(CHARACTER.AMADOR)
+                choose_scenary(CHARACTER.AMADOR, is_profissional_unlocked)
+            elif profissional_button.is_clicked(mouse_pos, mouse_clicks) and is_profissional_unlocked == False:
+                window.blit(character_locked_text, character_locked_text_rect)
             elif profissional_button.is_clicked(mouse_pos, mouse_clicks):
-                choose_scenary(CHARACTER.PROFISSIONAL)
+                choose_scenary(CHARACTER.PROFISSIONAL, is_profissional_unlocked)
 
             pygame.display.update()
             clock.tick(FPS)
 
-def choose_scenary(character):
+def choose_scenary(character, is_profissional_unlocked):
     menuScenery = True
     window.fill(BLACK)
     large_text = MEDIUM_FONT.render("Escolha o cenário", True, YELLOW)
@@ -274,11 +286,11 @@ def choose_scenary(character):
             soft_button.draw(mouse_pos, window)
 
             if classico_button.is_clicked(mouse_pos, mouse_clicks):
-                main_game(GAMEMODE.CLASSICO, character)
+                main_game(GAMEMODE.CLASSICO, character, is_profissional_unlocked)
             elif rua_button.is_clicked(mouse_pos, mouse_clicks):
-                main_game(GAMEMODE.RUA, character)
+                main_game(GAMEMODE.RUA, character, is_profissional_unlocked)
             elif soft_button.is_clicked(mouse_pos, mouse_clicks):
-                main_game(GAMEMODE.SOFT, character)
+                main_game(GAMEMODE.SOFT, character, is_profissional_unlocked)
 
             pygame.display.update()
             clock.tick(FPS)
@@ -291,10 +303,12 @@ def get_world(gameMode):
     else:
         return pygame.image.load("resources/background/soft.jpg").convert()
 
-def main_game(gameMode, character):
+def main_game(gameMode, character, is_profissional_unlocked):
     ENEMY_SPEED = 5
+    score_temp_count = 0
     SCORE = 0
     screen = pygame.display.set_mode(screen_size)
+    display_unlocked_message = False
         
     world = get_world(gameMode)
     world_x = 0
@@ -345,16 +359,26 @@ def main_game(gameMode, character):
             entity.move(1)
         
         P1.jump()
-        SCORE = E1.get_score()
-        score(SCORE)
+        score_temp_count += 0.05
+        SCORE = int(score_temp_count)
+        if SCORE >= 50 and is_profissional_unlocked == False:
+            is_profissional_unlocked = True
+            display_unlocked_message = True
+        else:
+            score(SCORE)
 
         if pygame.sprite.spritecollideany(P1, enemies):
-            game_over()   
+            game_over(is_profissional_unlocked)   
             pygame.display.update()
+
+        if (display_unlocked_message):
+            font = pygame.font.Font('freesansbold.ttf', 20)
+            unlocked_character_text = font.render("'Profissional' desbloqueado!", True, YELLOW)
+            window.blit(unlocked_character_text, (screen_width/2, screen_height/2 * 1.5))
 
         pygame.display.flip()
 
-def game_over():
+def game_over(is_profissional_unlocked):
         #pygame.mixer.music.load('game_over.wav')
     #pygame.mixer.music.play()
     #pygame.mixer.music.set_volume(0.5)
@@ -365,11 +389,11 @@ def game_over():
     window.blit(game_over_text, game_over_text_rect)
     pygame.display.flip()
     time.sleep(1)
-    game_menu()
+    game_menu(is_profissional_unlocked)
 
 def score(score):
     font = pygame.font.Font('freesansbold.ttf', 20)
     text = font.render("Score: " + str(score) + " m", True, YELLOW)
     window.blit(text, (0,0))
 
-game_menu()
+game_menu(is_profissional_unlocked)
