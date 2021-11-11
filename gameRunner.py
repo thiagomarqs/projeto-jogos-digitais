@@ -359,6 +359,7 @@ def main_game(gameMode, character, is_profissional_unlocked):
             entity.move(1)
         
         P1.jump()
+        
         score_temp_count += 0.05
         SCORE = int(score_temp_count)
         if SCORE >= 50 and is_profissional_unlocked == False:
