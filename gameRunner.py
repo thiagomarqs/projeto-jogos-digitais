@@ -224,7 +224,7 @@ def choose_character(is_profissional_unlocked):
     window.blit(large_text, text_rect)
     window.blit(large_text, text_rect)
 
-    character_locked_text = SMALL_FONT.render("'Profissional' bloqueado! Complete 50m!", True, YELLOW)
+    character_locked_text = SMALL_FONT.render("'Profissional' bloqueado! Complete 20m!", True, YELLOW)
     character_locked_text_rect = character_locked_text.get_rect()
     character_locked_text_rect.center = (screen_width // 2, (screen_height) - 50)
 
@@ -359,10 +359,10 @@ def main_game(gameMode, character, is_profissional_unlocked):
             entity.move(1)
         
         P1.jump()
-        
+
         score_temp_count += 0.05
         SCORE = int(score_temp_count)
-        if SCORE >= 50 and is_profissional_unlocked == False:
+        if SCORE >= 20 and is_profissional_unlocked == False:
             is_profissional_unlocked = True
             display_unlocked_message = True
         else:
