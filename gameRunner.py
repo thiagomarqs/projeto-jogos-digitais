@@ -161,6 +161,8 @@ class Player(pygame.sprite.Sprite):
         self.jumpCount = 10
         self.type = 2
 
+        self.initial_rect_y = self.rect.y
+
     # speed deve ser um número menor que 1
     def move(self, speed):
         self.current_sprite += speed
@@ -175,9 +177,11 @@ class Player(pygame.sprite.Sprite):
             if self.jumpCount >= -10:
                 self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.35
                 self.jumpCount -= 1
+                self.image = self.sprites[0]
             else: 
                 self.jumpCount = 10
                 self.isJump = False
+                self.rect.y = self.initial_rect_y
 
 def game_menu(is_profissional_unlocked, onClick=False):
 
