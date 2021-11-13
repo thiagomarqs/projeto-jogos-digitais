@@ -2,8 +2,6 @@ import sys, pygame, math, glob, random, time, pygame.mixer
 import pygame
 from pygame.constants import K_SPACE
 from button import Button
-assert sys.version_info >= (3,4), 'This script requires at least Python 3.4'
-
 
 pygame.mixer.pre_init(44100, -16, 2, 2048) 
 
@@ -11,9 +9,13 @@ pygame.init()
 
 pygame.mixer.init()
 
-#pygame.mixer.music.load('menu.mp3')
 
-#pygame.mixer.music.play(-1)
+jump_sound = pygame.mixer.Sound('resources/sound/jump.wav')
+notification_sound = pygame.mixer.Sound('resources/sound/notification.wav')
+game_over_sound = pygame.mixer.Sound('resources/sound/game_over.wav')
+pygame.mixer.music.load('resources/sound/menu.mp3')
+
+pygame.mixer.music.play(-1)
 
 PURPLE = (255, 0, 255)
 GREEN = (0, 255, 0)
@@ -21,6 +23,8 @@ BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 DARKBLUE = (0, 0, 139)
+RED = (255, 0, 0)
+WHITE = (255, 255, 255)
 
 screen_width = 800
 screen_height = 600
@@ -37,6 +41,7 @@ SMALL_FONT = pygame.font.SysFont(None, 35)
 SCORE = 0
 ENEMY_SPEED = 5
 
+score_list = []
 
 # Tive que passar essa variável como argumento de várias
 # funções porque o main_game() não reconheceu essa variável
@@ -51,7 +56,7 @@ class GAMEMODE(enumerate):
 class CHARACTER(enumerate):
     AMADOR = 1
     PROFISSIONAL = 2
- 
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, gameMode):
         super().__init__() 
@@ -195,7 +200,10 @@ def game_menu(is_profissional_unlocked, onClick=False):
     window.blit(large_text, text_rect)
     window.blit(large_text, text_rect)
 
-    start_button = Button("Jogar!", screen_width // 2 - 125,
+    start_button = Button("Jogar!", screen_width // 2 - 300,
+                          screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
+
+    scoreboard_button = Button("Pontuações", screen_width // 2 + 100,
                           screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
 
     while menu:
@@ -212,9 +220,12 @@ def game_menu(is_profissional_unlocked, onClick=False):
 
             mouse_pos = pygame.mouse.get_pos()
             start_button.draw(mouse_pos, window)
+            scoreboard_button.draw(mouse_pos, window)
 
             if not onClick and start_button.is_clicked(mouse_pos, mouse_clicks):
                 choose_character(is_profissional_unlocked)
+            elif not onClick and scoreboard_button.is_clicked(mouse_pos, mouse_clicks):
+                scoreboard(score_list, is_profissional_unlocked)
 
             pygame.display.update()
             clock.tick(FPS)
@@ -299,6 +310,39 @@ def choose_scenary(character, is_profissional_unlocked):
             pygame.display.update()
             clock.tick(FPS)
         
+def scoreboard(score_list, is_profissional_unlocked, onClick=False):
+    scoreboard = True
+
+    window.fill(BLACK)
+    large_text = MEDIUM_FONT.render("Scoreboard", True, YELLOW)
+    text_rect = large_text.get_rect()
+    text_rect.center = (screen_width // 2, (screen_height // 2) - 230)
+    window.blit(large_text, text_rect)
+
+    back_button = Button("Voltar", screen_width // 2 - 100,
+                          screen_height // 2 + 150, 100, 200, YELLOW, BLUE, BLACK, 40)
+
+    while scoreboard:
+        mouse_clicks = pygame.mouse.get_pressed()
+        if onClick and mouse_clicks[0] == 0:
+            onClick = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                 if event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
+                     game_menu(is_profissional_unlocked)
+
+            mouse_pos = pygame.mouse.get_pos()
+            back_button.draw(mouse_pos, window)
+
+            if not onClick and back_button.is_clicked(mouse_pos, mouse_clicks):
+                game_menu(is_profissional_unlocked)
+
+            pygame.display.update()
+            clock.tick(FPS)
+
 def get_world(gameMode):
     if gameMode == GAMEMODE.CLASSICO:
         return pygame.image.load("resources/background/classico.jpg").convert()
@@ -347,6 +391,7 @@ def main_game(gameMode, character, is_profissional_unlocked):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     P1.isJump = True
+                    jump_sound.play()
  
         # Animação do background
         screen.blit(world, (world_x,0))
@@ -369,6 +414,7 @@ def main_game(gameMode, character, is_profissional_unlocked):
         if SCORE >= 20 and is_profissional_unlocked == False:
             is_profissional_unlocked = True
             display_unlocked_message = True
+            notification_sound.play()
         else:
             score(SCORE)
 
@@ -384,9 +430,7 @@ def main_game(gameMode, character, is_profissional_unlocked):
         pygame.display.flip()
 
 def game_over(is_profissional_unlocked):
-        #pygame.mixer.music.load('game_over.wav')
-    #pygame.mixer.music.play()
-    #pygame.mixer.music.set_volume(0.5)
+    game_over_sound.play()
     game_over_text = pygame.font.Font('freesansbold.ttf', 60)
     game_over_text = game_over_text.render("Game Over", True, YELLOW)
     game_over_text_rect = game_over_text.get_rect()
@@ -397,8 +441,8 @@ def game_over(is_profissional_unlocked):
     game_menu(is_profissional_unlocked)
 
 def score(score):
-    font = pygame.font.Font('freesansbold.ttf', 20)
-    text = font.render("Score: " + str(score) + " m", True, YELLOW)
+    font = pygame.font.Font('freesansbold.ttf', 40)
+    text = font.render("Score: " + str(score) + " m", True, WHITE)
     window.blit(text, (0,0))
 
 game_menu(is_profissional_unlocked)
