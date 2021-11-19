@@ -278,15 +278,13 @@ def choose_scenary(character, is_profissional_unlocked):
     text_rect.center = (screen_width // 2, (screen_height // 2) - 50)
     window.blit(large_text, text_rect)
     window.blit(large_text, text_rect)
-
     
-    classico_button = Button("Classico", screen_width // 2 + 160,
-                           screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
+    classico_button = Button("Classico", screen_width // 2 - 370,
+                          screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
     rua_button = Button("Rua", screen_width // 2 - 103,
                            screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
-    soft_button = Button("Soft", screen_width // 2 - 370,
-                          screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
-
+    soft_button = Button("Soft", screen_width // 2 + 160,
+                           screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
     while menuScenery:
         mouse_clicks = pygame.mouse.get_pressed()
         for event in pygame.event.get():
