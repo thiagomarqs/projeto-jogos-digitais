@@ -121,7 +121,6 @@ class Enemy(pygame.sprite.Sprite):
                 self.score += 10
             
             self.image = self.sprites[self.indexSprite]
-            print(self.score)
 
     def get_score(self):
         return self.score
@@ -223,7 +222,7 @@ def game_menu(is_profissional_unlocked, onClick=False):
             if not onClick and start_button.is_clicked(mouse_pos, mouse_clicks):
                 choose_character(is_profissional_unlocked)
             elif not onClick and scoreboard_button.is_clicked(mouse_pos, mouse_clicks):
-                show_scoreboard(is_profissional_unlocked)
+                show_highscores(is_profissional_unlocked)
 
             pygame.display.update()
             clock.tick(FPS)
@@ -306,10 +305,10 @@ def choose_scenary(character, is_profissional_unlocked):
             pygame.display.update()
             clock.tick(FPS)
         
-def show_scoreboard(is_profissional_unlocked, onClick=False):
+def show_highscores(is_profissional_unlocked, onClick=False):
 
     window.fill(BLACK)
-    large_text = MEDIUM_FONT.render("Scoreboard", True, YELLOW)
+    large_text = MEDIUM_FONT.render("Highscores", True, YELLOW)
     text_rect = large_text.get_rect()
     text_rect.center = (screen_width // 2, (screen_height // 2) - 230)
     window.blit(large_text, text_rect)
