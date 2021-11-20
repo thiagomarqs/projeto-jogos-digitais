@@ -89,11 +89,10 @@ class Enemy(pygame.sprite.Sprite):
         self.score = 0
     
     def move(self, speed=None):
-        print(self.enemy_speed)
         self.rect.x -= 30 + self.enemy_speed
         self.image = self.sprites[self.indexSprite]
         
-        if self.enemy_speed < 40:
+        if self.enemy_speed < 25:
             self.enemy_speed += 0.03
         
         if self.rect.x < 0 - 50:
