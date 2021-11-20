@@ -39,8 +39,6 @@ LARGE_FONT = pygame.font.SysFont(None, 115)
 MEDIUM_FONT = pygame.font.SysFont(None, 65)
 SMALL_FONT = pygame.font.SysFont(None, 35)
 
-ENEMY_SPEED = 5
-
 scoreboard = Scoreboard(0)
 
 # Tive que passar essa variável como argumento de várias
@@ -58,15 +56,13 @@ class CHARACTER(enumerate):
     PROFISSIONAL = 2
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, gameMode):
+    def __init__(self, gameMode, character):
         super().__init__() 
 
         self.sprites = []
         
         if gameMode == GAMEMODE.CLASSICO:
-            self.sprites = [
-                pygame.image.load("resources/enemy/obstacle.png").convert_alpha()
-            ]
+            self.sprites = [pygame.image.load("resources/enemy/obstacle.png").convert_alpha()]
         else:
             self.sprites = [
                 pygame.image.load("resources/enemy/trash.png").convert_alpha(),
@@ -76,6 +72,12 @@ class Enemy(pygame.sprite.Sprite):
                 pygame.image.load("resources/enemy/cat.png").convert_alpha(),
                 pygame.image.load("resources/enemy/rock.png").convert_alpha(),
             ]
+
+        if character == CHARACTER.AMADOR:
+            self.enemy_speed = 0
+        elif character == CHARACTER.PROFISSIONAL:
+            self.enemy_speed = 10
+
         self.indexSprite = 0
         self.image = self.sprites[self.indexSprite]
         self.rect = self.image.get_rect()
@@ -86,44 +88,35 @@ class Enemy(pygame.sprite.Sprite):
         self.type = 1
         self.score = 0
     
-    def move(self, speed):
-        self.rect.x -= 45
-        if self.rect.x < -500:
-
+    def move(self, speed=None):
+        print(self.enemy_speed)
+        self.rect.x -= 30 + self.enemy_speed
+        self.image = self.sprites[self.indexSprite]
+        
+        if self.enemy_speed < 40:
+            self.enemy_speed += 0.03
+        
+        if self.rect.x < 0 - 50:
             if(self.indexSprite < len(self.sprites) - 1):
                 self.indexSprite += 1
+                self.rect = self.image.get_rect()
             else:
                 self.indexSprite = 0
             
-            if(self.indexSprite == 0):
-                self.rect.x = 800
+            # Posicionamento do eixo y de acordo com a imagem
+            if self.indexSprite in range(0, 2):
                 self.rect.y = 490
-
-            elif(self.indexSprite == 1):
-                self.rect.x = 800
-                self.rect.y = 495
-
             elif(self.indexSprite == 2):
-                self.rect.x = 800
                 self.rect.y = 507
-
             elif(self.indexSprite == 3):
-                self.rect.x = 800
                 self.rect.y = 550
-            
             elif(self.indexSprite == 4):
-                self.rect.x = 800
                 self.rect.y = 559
-
             elif(self.indexSprite == 5):
-                self.rect.x = 800
                 self.rect.y = 559
-                self.score += 10
             
-            self.image = self.sprites[self.indexSprite]
+            self.rect.x = 800 + 50
 
-    def get_score(self):
-        return self.score
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, character, pos_x, pos_y, speed):
@@ -179,7 +172,7 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         if(self.isJump):
             if self.jumpCount >= -10:
-                self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.35
+                self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.40
                 self.jumpCount -= 1
                 self.image = self.sprites[0]
             else: 
@@ -364,7 +357,7 @@ def main_game(gameMode, character, is_profissional_unlocked):
     P1 = Player(character, 100,380,0.5)
 
     #Creating Sprites Groups
-    E1 = Enemy(gameMode)
+    E1 = Enemy(gameMode, character)
     enemies = pygame.sprite.Group()
     enemies.add(E1)
     all_sprites = pygame.sprite.Group()
