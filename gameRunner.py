@@ -13,8 +13,13 @@ pygame.mixer.init()
 jump_sound = pygame.mixer.Sound('resources/sound/jump.wav')
 notification_sound = pygame.mixer.Sound('resources/sound/notification.wav')
 game_over_sound = pygame.mixer.Sound('resources/sound/game_over.wav')
-pygame.mixer.music.load('resources/sound/menu.mp3')
 
+jump_sound.set_volume(0.5)
+notification_sound.set_volume(0.5)
+game_over_sound.set_volume(0.5)
+
+pygame.mixer.music.load('resources/sound/menu.mp3' )
+pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
 PURPLE = (255, 0, 255)
@@ -87,12 +92,13 @@ class Enemy(pygame.sprite.Sprite):
         self.massaJump = 1
         self.type = 1
         self.score = 0
+        self.radius = self.rect.x // 7.3
     
     def move(self, speed=None):
         self.rect.x -= 30 + self.enemy_speed
         self.image = self.sprites[self.indexSprite]
         
-        if self.enemy_speed < 25:
+        if self.enemy_speed < 30:
             self.enemy_speed += 0.03
         
         if self.rect.x < 0 - 50:
@@ -115,6 +121,26 @@ class Enemy(pygame.sprite.Sprite):
                 self.rect.y = 559
             
             self.rect.x = 800 + 50
+
+            # Ajuste do raio do circulo invisivel do hitbox
+            # de acordo com a imagem
+            if self.indexSprite == 1:
+                self.radius = self.rect.x // 8
+            elif self.indexSprite == 2:
+                self.radius = self.rect.x // 7
+            elif self.indexSprite == 3:
+                self.radius = self.rect.x // 5.5
+            elif self.indexSprite == 4:
+                self.radius = self.rect.x // 5
+            elif self.indexSprite == 5:
+                self.radius = self.rect.x // 5
+
+    def colisao(self, other):
+        distancia =  math.sqrt( ((self.rect.x-other.rect.x)**2)+((self.rect.y-other.rect.y)**2) )
+        if (self.radius + other.radius) >= distancia:
+            return True
+        else:
+            return False
 
 
 class Player(pygame.sprite.Sprite):
@@ -154,10 +180,11 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos_x, pos_y]
         self.isJump = False
-        self.jumpCount = 10
+        self.jumpCount = 6.5
         self.type = 2
 
         self.initial_rect_y = self.rect.y
+        self.radius = self.rect.x // 4
 
     # speed deve ser um número menor que 1
     def move(self, speed):
@@ -170,14 +197,27 @@ class Player(pygame.sprite.Sprite):
 
     def jump(self):
         if(self.isJump):
-            if self.jumpCount >= -10:
-                self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 0.40
+            if self.jumpCount >= -6.5:
+                self.rect.y -= (self.jumpCount * abs(self.jumpCount)) * 1
                 self.jumpCount -= 1
                 self.image = self.sprites[0]
             else: 
-                self.jumpCount = 10
+                self.jumpCount = 6.5
                 self.isJump = False
                 self.rect.y = self.initial_rect_y
+    
+    def colisao(self, other):
+        distancia =  math.sqrt( ((self.rect.x-other.rect.x)**2)+((self.rect.y-other.rect.y)**2) )
+        if (self.radius + other.radius) >= distancia:
+            return True
+        else:
+            return False
+
+    def checaColisoes(self, others):
+        for o in others:
+            if self.colisao(o):
+                return True
+        return False
 
 def game_menu(is_profissional_unlocked, onClick=False):
     menu = True
@@ -232,9 +272,9 @@ def choose_character(is_profissional_unlocked):
     character_locked_text_rect = character_locked_text.get_rect()
     character_locked_text_rect.center = (screen_width // 2, (screen_height) - 50)
 
-    amador_button = Button("Corredor amador", screen_width // 8.1,
+    amador_button = Button("Rodrigo (amador)", screen_width // 8.1,
                            screen_height // 2 + 100, 100, 300, YELLOW, BLUE, BLACK, 40)
-    profissional_button = Button("Corredor profissional", screen_width // 1.9,
+    profissional_button = Button("Thunder (profissional)", screen_width // 1.9,
                            screen_height // 2 + 100, 100, 300, YELLOW, BLUE, BLACK, 40)
 
     while menuScenery:
@@ -410,7 +450,7 @@ def main_game(gameMode, character, is_profissional_unlocked):
         else:
             score(scoreboard.current_score)
 
-        if pygame.sprite.spritecollideany(P1, enemies):
+        if P1.checaColisoes(enemies):
             scoreboard.set_new_highscore()
             game_over(is_profissional_unlocked)   
             pygame.display.update()
