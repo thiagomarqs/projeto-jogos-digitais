@@ -98,7 +98,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x -= 30 + self.enemy_speed
         self.image = self.sprites[self.indexSprite]
         
-        if self.enemy_speed < 30:
+        if self.enemy_speed < 29.5:
             self.enemy_speed += 0.03
         
         if self.rect.x < 0 - 50:
@@ -229,10 +229,13 @@ def game_menu(is_profissional_unlocked, onClick=False):
     window.blit(large_text, text_rect)
     window.blit(large_text, text_rect)
 
-    start_button = Button("Jogar!", screen_width // 2 - 300,
+    start_button = Button("Jogar!", screen_width // 2 - 350,
                           screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
 
-    scoreboard_button = Button("Pontuações", screen_width // 2 + 100,
+    scoreboard_button = Button("Pontuações", screen_width // 2 - 100,
+                          screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
+
+    instructions_button = Button("Instruções", screen_width // 2 + 150,
                           screen_height // 2 + 100, 100, 200, YELLOW, BLUE, BLACK, 40)
 
     while menu:
@@ -250,11 +253,14 @@ def game_menu(is_profissional_unlocked, onClick=False):
             mouse_pos = pygame.mouse.get_pos()
             start_button.draw(mouse_pos, window)
             scoreboard_button.draw(mouse_pos, window)
+            instructions_button.draw(mouse_pos, window)
 
             if not onClick and start_button.is_clicked(mouse_pos, mouse_clicks):
                 choose_character(is_profissional_unlocked)
             elif not onClick and scoreboard_button.is_clicked(mouse_pos, mouse_clicks):
                 show_highscores(is_profissional_unlocked)
+            elif not onClick and instructions_button.is_clicked(mouse_pos, mouse_clicks):
+                show_instructions(is_profissional_unlocked)
 
             pygame.display.update()
             clock.tick(FPS)
@@ -351,6 +357,49 @@ def show_highscores(is_profissional_unlocked, onClick=False):
     window.blit(second_place_text, ((screen_width // 2) - 150, 250))
     third_place_text = MEDIUM_FONT.render("3. lugar:   " + str(scoreboard.highscores['third']) + " m", True, BRONZE)
     window.blit(third_place_text, ((screen_width // 2) - 150, 350))
+
+    back_button = Button("Voltar", screen_width // 2 - 100,
+                          screen_height // 2 + 150, 100, 200, YELLOW, BLUE, BLACK, 40)
+
+    while True:
+        mouse_clicks = pygame.mouse.get_pressed()
+        if onClick and mouse_clicks[0] == 0:
+            onClick = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                 if event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE:
+                     game_menu(is_profissional_unlocked)
+
+            mouse_pos = pygame.mouse.get_pos()
+            back_button.draw(mouse_pos, window)
+
+            if not onClick and back_button.is_clicked(mouse_pos, mouse_clicks):
+                game_menu(is_profissional_unlocked)
+
+            pygame.display.update()
+            clock.tick(FPS)
+
+def show_instructions(is_profissional_unlocked, onClick=False):
+
+    window.fill(BLACK)
+    large_text = MEDIUM_FONT.render("Highscores", True, YELLOW)
+    text_rect = large_text.get_rect()
+    text_rect.center = (screen_width // 2, (screen_height // 2) - 230)
+    window.blit(large_text, text_rect)
+
+    text = SMALL_FONT.render("Rodrigo e Thunder são os dois personagens.", True, WHITE)
+    text2 = SMALL_FONT.render("Rodrigo corre por lazer, já Thunder é um corredor profissional.", True, WHITE)
+    text3 = SMALL_FONT.render("Seu objetivo é fazer o maior número de pontos possível.", True, WHITE)
+    text4 = SMALL_FONT.render("Utilize a barra de espaço para pular os obstáculos", True, BRONZE)
+    text5 = SMALL_FONT.render("E aí, até onde você consegue chegar?", True, WHITE)
+    window.blit(text, (30, 100 + 40))
+    window.blit(text2, (30, 150 + 40))
+    window.blit(text3, (30, 200 + 40))
+    window.blit(text4, (30, 250 + 40))
+    window.blit(text5, (30, 300 + 40))
 
     back_button = Button("Voltar", screen_width // 2 - 100,
                           screen_height // 2 + 150, 100, 200, YELLOW, BLUE, BLACK, 40)
